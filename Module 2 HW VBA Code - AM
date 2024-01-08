@@ -1,0 +1,102 @@
+Attribute VB_Name = "Module1"
+Sub stockdata()
+
+Dim ticker As String
+Dim openprice As Double
+Dim closeprice As Double
+Dim tickervolume As Double
+Dim newtickerrow As Integer
+Dim yearlychange As Double
+Dim percentchange As Double
+
+For Each ws In ThisWorkbook.Worksheets
+
+Cells(1, 9).Value = "ticker"
+Cells(1, 10).Value = "yearly change"
+Cells(1, 11).Value = "percent change"
+Cells(1, 12).Value = "total stock volume"
+
+tickervolume = 0
+newtickerrow = 2
+openprice = Cells(2, 3).Value
+
+lastRow = Cells(Rows.Count, 1).End(xlUp).Row
+        
+For i = 2 To lastRow
+
+If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+Range("I" & newtickerrow).Value = ticker
+ticker = Cells(i, 1).Value
+
+tickervolume = tickervolume + Cells(i, 7).Value
+Range("L" & newtickerrow).Value = tickervolume
+
+closeprice = Cells(i, 6).Value
+yearlychange = (closeprice - openprice)
+              
+Range("J" & newtickerrow).Value = yearlychange
+
+If (openprice = 0) Then
+
+percentchange = 0
+
+Else
+                    
+percentchange = yearlychange / openprice
+                
+End If
+
+Range("K" & newtickerrow).Value = percentchange
+Range("K" & newtickerrow).NumberFormat = "0.00%"
+   
+newtickerrow = newtickerrow + 1
+tickervolume = 0
+openprice = Cells(i + 1, 3)
+            
+Else
+              
+tickervolume = tickervolume + Cells(i, 7).Value
+            
+End If
+Next i
+
+tickertable = Cells(Rows.Count, 9).End(xlUp).Row
+    
+For i = 2 To tickertable
+If Cells(i, 10).Value > 0 Then
+Cells(i, 10).Interior.ColorIndex = 10
+            
+Else
+Cells(i, 10).Interior.ColorIndex = 3
+            
+End If
+Next i
+
+Cells(1, 15).Value = "ticker"
+Cells(1, 16).Value = "value"
+Cells(2, 14).Value = "greatest % increase"
+Cells(3, 14).Value = "greatest % decrease"
+Cells(4, 14).Value = "greatest total volume"
+
+For i = 2 To tickertable
+
+If Cells(i, 11).Value = Application.WorksheetFunction.Max(Range("K2:K" & tickertable)) Then
+Cells(2, 15).Value = Cells(i, 9).Value
+Cells(2, 16).Value = Cells(i, 11).Value
+Cells(2, 16).NumberFormat = "0.00%"
+
+
+ElseIf Cells(i, 11).Value = Application.WorksheetFunction.Min(Range("K2:K" & tickertable)) Then
+Cells(3, 15).Value = Cells(i, 9).Value
+Cells(3, 16).Value = Cells(i, 11).Value
+Cells(3, 16).NumberFormat = "0.00%"
+
+ElseIf Cells(i, 12).Value = Application.WorksheetFunction.Max(Range("L2:L" & tickertable)) Then
+Cells(4, 15).Value = Cells(i, 9).Value
+Cells(4, 16).Value = Cells(i, 12).Value
+
+End If
+Next i
+Next ws
+
+End Sub
